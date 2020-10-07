@@ -4,7 +4,9 @@ let playerTwo = 2;
 let row = 6;
 let col = 7;
 
-let testBoard = [];
+let gameBoard = [];
+let winner = false;
+let currPlayer = 1;
 
 // create the blank board for the game
 function createBlankBoard(){
@@ -20,10 +22,10 @@ function createBlankBoard(){
         innerArray.push('\n');
 
         // now add in the inner array into the main array
-        testBoard.push(innerArray);
+        gameBoard.push(innerArray);
     }
-    console.log("this is the test board");
-    console.log(testBoard);
+    // console.log("this is the test board");
+    // console.log(gameBoard);
 }
 
 // prints the board using the 2d array
@@ -32,14 +34,14 @@ function printBoard(){
     for(var i = 0; i < row; i++){
         var toPrint = '|';
         for(var x = 0; x < col; x++){
-            toPrint = toPrint + testBoard[i][x] + '|';
+            toPrint = toPrint + gameBoard[i][x] + '|';
         }
         console.log(toPrint);
     }
 }
 
-// make move
-function makeMove(input){
+// make move (by player?)
+function makeMove(player){
 
 }
 
@@ -48,9 +50,25 @@ function isWinner(){
     
 }
 
+// change the turn for the next player
+function determineTurn(currPlayer){
+
+}
+
+
+// start of actual game code
 createBlankBoard();
-
-//while loop for the game
-
 printBoard();
+
+//while loop for the game (NEED TO TAKE USER INPUT)
+/*
+while(!winner){
+    printBoard();
+    determineTurn(currPlayer);
+    makeMove(currPlayer);
+    isWinner();
+}
+*/
+
+
 console.log("fin");
