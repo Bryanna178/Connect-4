@@ -1,3 +1,4 @@
+let totalPlayers;
 let totalRealPlayers;
 let totalAiPlayers;
 
@@ -26,12 +27,14 @@ class Card {
 }
 
 /*
-a player will have the total number of cards and also a flag to say if they are real or not
+a player will have its hand and also a flag to say if they are real or not
 */
-var Player = {
-    totalCards: -1,
-    aiPlayer: false
-};
+class Player {
+    constructor(hand, aiPlayer){
+        this.hand = hand;
+        this.aiPlayer = aiPlayer;
+    }
+}
 
 
 let deck = [];      // cards that can be drawn out
@@ -68,18 +71,45 @@ function createDeck(){
     var colorArr = ['RED','BLUE','PURPLE','YELLOW','GREEN'];
 
     for(var i = 0; i < 5; i++){
-        for(var x = 0; x < 10; x++){
+        for(var x = 0; x < 10; x++){                // change to x < 1 to see that it works
             var newCard = new Card(colorArr[i],x+1);
             deck.push(newCard);
         }
     }
 }
 
+function shuffleDeck(playingDeck){
+    for(var i = 0; i < playingDeck.length;i++){
+        var rand = 0;
+        var rand2 = 0;
+
+        // keep generating a random number till they are distinct
+        while(rand2 === rand){
+            rand = Math.floor(Math.random() * Math.floor(playingDeck.length));
+            rand2 = Math.floor(Math.random() * Math.floor(playingDeck.length-1));
+        }
+
+        //get cards that are going to be swaped
+        var card1 = playingDeck[rand];
+        var card2 = playingDeck[rand2];
+
+        //swap them
+        playingDeck[rand] = card2;
+        playingDeck[rand2] = card1;
+    }
+}
+
+function dealDeck(){
+
+}
 
 //------------------------------------------ actual game code so far it is just practice
 
 createDeck();
+shuffleDeck(deck);
 
+// test to see that the deck is created correctly
 for(var i = 0; i < deck.length; i++){
     deck[i].printInfo();
 }
+console.log(deck.length);
