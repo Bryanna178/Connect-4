@@ -1,6 +1,20 @@
-let totalPlayers;
-let totalRealPlayers;
-let totalAiPlayers;
+// for now manually change the player numbers (need to get user input soon)
+
+let totalRealPlayers = 1;
+let totalAiPlayers = 3;
+let totalPlayers = totalRealPlayers + totalAiPlayers;
+
+let deck = [];      // cards that can be drawn out
+let pile = [];      // played cards
+let players = [];   // list of players
+
+/*
+used to prompt user for input but need to run the following command to use
+
+npm install prompt-sync
+*/
+const prompt = require('prompt-sync')();
+
 
 /*
 attributes of a card
@@ -35,12 +49,6 @@ class Player {
         this.aiPlayer = aiPlayer;
     }
 }
-
-
-let deck = [];      // cards that can be drawn out
-let pile = [];      // played cards
-let players = [];   // list of players
-
 
 /*
 LOGIC OF UNO WITHOUT REVERSE AND WILD CARDS YET...
@@ -112,4 +120,9 @@ shuffleDeck(deck);
 for(var i = 0; i < deck.length; i++){
     deck[i].printInfo();
 }
-console.log(deck.length);
+
+totalRealPlayers = prompt('Total number of real players? ');
+totalAiPlayers = prompt('Total number of AI players? ');
+
+
+console.log(`total cards in deck ${deck.length}, total real players ${totalRealPlayers}, total AI players ${totalAiPlayers}`);
