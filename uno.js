@@ -1,12 +1,8 @@
-// for now manually change the player numbers (need to get user input soon)
-
-let totalRealPlayers = 1;
-let totalAiPlayers = 3;
-let totalPlayers = totalRealPlayers + totalAiPlayers;
 
 let deck = [];      // cards that can be drawn out
 let pile = [];      // played cards
 let players = [];   // list of players
+let winner = false;
 
 /*
 used to prompt user for input but need to run the following command to use
@@ -34,6 +30,10 @@ class Card {
         console.log(this.color + ' ' + this.number + '\n');
     }
 
+    getFace(){
+        return this.color + ' ' + this.number;
+    }
+
     printInfo(){
         console.log(this.color + ' ' + this.number);
         console.log('playable: ' + this.playable + ' in deck: ' + this.inDeck)
@@ -44,10 +44,101 @@ class Card {
 a player will have its hand and also a flag to say if they are real or not
 */
 class Player {
-    constructor(hand, aiPlayer){
+    constructor(playerNum, hand, aiPlayer){
+        this.playerNum = playerNum;
         this.hand = hand;
         this.aiPlayer = aiPlayer;
     }
+
+    getPlayerNum(){ return this.playerNum; }
+
+    printInfo(){
+        console.log(`player number: ${this.playerNum}\nhand: ${this.getHand()}\nai: ${this.aiPlayer}\n`);
+    }
+
+    getHand(){
+        let handStr = '';
+        for(var i = 0; i < this.hand.length;i++){
+            handStr += `${i}:` + this.hand[i].getFace() + ' ';
+        }
+        return handStr;
+    }
+
+
+//     // NEED TO FIX*********************
+//     removeCard(index){
+//         //remove the card
+//         delete this.hand[index];
+//         var newArr = [];
+
+//         //copy valid cards
+//         for(var i = 0; i < this.hand.length; i++){
+//             if(this.hand[i] !== undefined){
+//                 newArr[i] = this.hand[i];
+//             }
+//         }
+//         console.log(`new size ${newArr.length}`);
+
+//         //assign new array to hand
+//         this.hand = newArr;
+//     }
+
+//     // NEED TO FIX******************************
+//     makeMove(){
+//         printGameStats();
+//         console.log(this.getHand());
+//         let move = prompt('p: play card | d: draw ');
+//         console.log(`selected ${move.toUpperCase()}`);
+//         switch(move.toUpperCase()){
+//             //play the selected card
+//             case 'P':
+//                 let index = parseInt(prompt('which card?'),10);;
+//                 let cardToPlay = this.hand[index];
+//                 this.removeCard(index);
+//                 console.log(`playing ${cardToPlay.getFace()}`)
+//                 pile.push(cardToPlay);
+//                 break;
+
+//             // draw juan card
+//             case 'D':
+//                 cardDeal(this,1,deck);
+//                 break;
+//             case 'X':
+//                 return;
+//         }
+//     }
+}
+
+function printGameStats(){
+    console.log('*******************game stats********************************');
+    // print the info of the top card
+    pile[pile.length-1].printFace();
+
+    // print the number of cards that the opponents have
+    for(var i = 0; i < totalPlayers; i++){
+        console.log(`player: ${players[i].getPlayerNum()}\ntotal cards: ${players[i].hand.length}\n`);
+    }
+
+    console.log(`total cards left in deck ${deck.length}`);
+    console.log('************************************************************');
+}
+
+
+
+
+
+// creates the players array and returns it
+function createPlayers(){
+    let playerArr = [];
+    
+    for(var i = 0; i < totalRealPlayers; i++){
+        playerArr.push(new Player(i,[],false));
+    }
+    for(var i = totalRealPlayers; i < totalPlayers; i++){
+        playerArr.push(new Player(i,[],true));
+    }
+
+    return playerArr;
 }
 
 /*
@@ -107,22 +198,78 @@ function shuffleDeck(playingDeck){
     }
 }
 
-function dealDeck(){
 
+/*
+gives cardQuantity amount of cards to the designated player
+written to get from the bottom of the deck (pop)
+*/
+function cardDeal(player,cardQuantity,gameDeck){
+    for(var i = 0; i < cardQuantity; i++){
+        // if the deck is empty get cards from the pile and reshuffle deck
+        // if(gameDeck.length === 0){
+        //     reshuffleDeck(pile);                // NEED TO MAKE SURE THAT THIS WORKS****
+        // }
+
+        player.hand.push(gameDeck.pop());
+    }
+    console.log(gameDeck.length);
 }
 
-//------------------------------------------ actual game code so far it is just practice
+/*
+add the cards from the pile back into
+the main deck and shuffle the cards
+*/
+// function reshuffleDeck(usedCardPile){
+//     for(var i = 0; i < usedCardPile.length; i++){
+//         deck.push(usedCardPile[i]);
+//     }
 
+//     shuffleDeck(deck);
+//     for(var i = 0; i < deck.length; i++){
+//         deck[i].printInfo();
+//     }
+//     console.log('done reshuffling deck from used card pile');
+// }
+
+//------------------------------------------ actual game code so far it is just practice
 createDeck();
 shuffleDeck(deck);
 
 // test to see that the deck is created correctly
-for(var i = 0; i < deck.length; i++){
-    deck[i].printInfo();
+// for(var i = 0; i < deck.length; i++){
+//     deck[i].printInfo();
+// }
+
+let totalRealPlayers = parseInt(prompt('Total number of real players? '),10);
+let totalAiPlayers = parseInt(prompt('Total number of AI players? '),10);
+let totalPlayers = totalRealPlayers + totalAiPlayers;
+
+// create player array
+players = createPlayers();
+
+// give cards to players
+for(var i = 0; i < players.length; i++){
+    cardDeal(players[i],5,deck);
 }
 
-totalRealPlayers = prompt('Total number of real players? ');
-totalAiPlayers = prompt('Total number of AI players? ');
+// print info for all the players
+for(var i = 0; i < players.length; i++){
+    players[i].printInfo();
+}
+
+//place a card on the pile
+pile.push(deck.pop());
+
+printGameStats();
+
+// NEEED TO CONTINUE****************************8
+// // the main loop of the game
+// currPlayer = 0;
+// while(!winner){
+//     // using remainder of curr / total
+//     players[currPlayer % totalPlayers].makeMove();
+// }
+
 
 
 console.log(`total cards in deck ${deck.length}, total real players ${totalRealPlayers}, total AI players ${totalAiPlayers}`);
