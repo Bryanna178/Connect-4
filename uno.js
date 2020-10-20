@@ -30,6 +30,7 @@ class Card {
         console.log(this.color + ' ' + this.number + '\n');
     }
 
+    // returns the face of the card as a string so that it can be used 
     getFace(){
         return this.color + ' ' + this.number;
     }
@@ -56,6 +57,7 @@ class Player {
         console.log(`player number: ${this.playerNum}\nhand: ${this.getHand()}\nai: ${this.aiPlayer}\n`);
     }
 
+    // gets the contents of the players hand and returns it as a string to print
     getHand(){
         let handStr = '';
         for(var i = 0; i < this.hand.length;i++){
@@ -65,54 +67,56 @@ class Player {
     }
 
 
-//     // NEED TO FIX*********************
-//     removeCard(index){
-//         //remove the card
-//         delete this.hand[index];
-//         var newArr = [];
+    // simulates the playing of a card
+    playCard(index){
+        //remove the card form the hand
+        delete this.hand[index];
+        var newArr = [];
 
-//         //copy valid cards
-//         for(var i = 0; i < this.hand.length; i++){
-//             if(this.hand[i] !== undefined){
-//                 newArr[i] = this.hand[i];
-//             }
-//         }
-//         console.log(`new size ${newArr.length}`);
+        //copy valid cards
+        for(var i = 0; i < this.hand.length; i++){
+            // getting valid cards only
+            if(this.hand[i] !== undefined){
+                newArr.push(this.hand[i]);
+            }
+        }
+        // console.log(`new size of player hand ${newArr.length}`);
 
-//         //assign new array to hand
-//         this.hand = newArr;
-//     }
+        //assign new array to hand
+        delete this.hand;
+        this.hand = newArr;
+    }
 
-//     // NEED TO FIX******************************
-//     makeMove(){
-//         printGameStats();
-//         console.log(this.getHand());
-//         let move = prompt('p: play card | d: draw ');
-//         console.log(`selected ${move.toUpperCase()}`);
-//         switch(move.toUpperCase()){
-//             //play the selected card
-//             case 'P':
-//                 let index = parseInt(prompt('which card?'),10);;
-//                 let cardToPlay = this.hand[index];
-//                 this.removeCard(index);
-//                 console.log(`playing ${cardToPlay.getFace()}`)
-//                 pile.push(cardToPlay);
-//                 break;
+    // NEED TO ADD MOVE VALIDATATION**************************************************************8
+    makeMove(){
+        printGameStats();
+        console.log(`Player ${this.playerNum} Make Your Move`)
+        console.log(this.getHand());
+        let move = prompt('p: play card | d: draw ');
+        switch(move.toUpperCase()){
+            //play the selected card
+            case 'P':
+                let index = parseInt(prompt('which card?'),10);;
+                let cardToPlay = this.hand[index];
 
-//             // draw juan card
-//             case 'D':
-//                 cardDeal(this,1,deck);
-//                 break;
-//             case 'X':
-//                 return;
-//         }
-//     }
+                this.playCard(index);
+                console.log(`playing ${cardToPlay.getFace()}`)
+                pile.push(cardToPlay);
+                break;
+
+            // NEED TO IMPLEMENT DRAWING***********************************************************
+            // // draw juan card
+            // case 'D':
+            //     cardDeal(this,1,deck);
+            //     break;
+        }
+    }
 }
 
 function printGameStats(){
     console.log('*******************game stats********************************');
     // print the info of the top card
-    pile[pile.length-1].printFace();
+    console.log(`Top Card of Pile: ${pile[pile.length-1].getFace()}`);
 
     // print the number of cards that the opponents have
     for(var i = 0; i < totalPlayers; i++){
@@ -219,19 +223,19 @@ function cardDeal(player,cardQuantity,gameDeck){
 add the cards from the pile back into
 the main deck and shuffle the cards
 */
-// function reshuffleDeck(usedCardPile){
-//     for(var i = 0; i < usedCardPile.length; i++){
-//         deck.push(usedCardPile[i]);
-//     }
+function reshuffleDeck(usedCardPile){
+    for(var i = 0; i < usedCardPile.length; i++){
+        deck.push(usedCardPile[i]);
+    }
 
-//     shuffleDeck(deck);
-//     for(var i = 0; i < deck.length; i++){
-//         deck[i].printInfo();
-//     }
-//     console.log('done reshuffling deck from used card pile');
-// }
+    shuffleDeck(deck);
+    for(var i = 0; i < deck.length; i++){
+        deck[i].printInfo();
+    }
+    console.log('done reshuffling deck from used card pile');
+}
 
-//------------------------------------------ actual game code so far it is just practice
+//--------------------------------------------------------- actual game code so far it is just practice
 createDeck();
 shuffleDeck(deck);
 
@@ -240,6 +244,7 @@ shuffleDeck(deck);
 //     deck[i].printInfo();
 // }
 
+// get the number of players for the game (MAYBE ADD IN A LIMIT BC OF LIMITED CARD IN THE DECK)
 let totalRealPlayers = parseInt(prompt('Total number of real players? '),10);
 let totalAiPlayers = parseInt(prompt('Total number of AI players? '),10);
 let totalPlayers = totalRealPlayers + totalAiPlayers;
@@ -260,15 +265,14 @@ for(var i = 0; i < players.length; i++){
 //place a card on the pile
 pile.push(deck.pop());
 
-printGameStats();
-
-// NEEED TO CONTINUE****************************8
-// // the main loop of the game
-// currPlayer = 0;
-// while(!winner){
-//     // using remainder of curr / total
-//     players[currPlayer % totalPlayers].makeMove();
-// }
+// NEEED TO CONTINUE****************************
+// the main loop of the game
+currPlayer = 0;
+while(!winner){
+    // using remainder of curr / total
+    players[currPlayer % totalPlayers].makeMove();
+    // currPlayer++;        // use when drawing a card feature is enabled
+}
 
 
 
