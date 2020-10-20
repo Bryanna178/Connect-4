@@ -119,7 +119,7 @@ function printGameStats(){
         console.log(`player: ${players[i].getPlayerNum()}\ntotal cards: ${players[i].hand.length}\n`);
     }
 
-    console.log(`total cards left in deck ${deck.length}\n`);
+    console.log(`total cards left in deck ${deck.length}`);
     console.log('************************************************************');
 }
 
@@ -262,6 +262,7 @@ pile.push(deck.pop());
 
 printGameStats();
 
+// NEEED TO CONTINUE****************************8
 // // the main loop of the game
 // currPlayer = 0;
 // while(!winner){
