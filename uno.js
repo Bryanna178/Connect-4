@@ -87,8 +87,32 @@ class Player {
         this.hand = newArr;
     }
 
-    // NEED TO ADD MOVE VALIDATATION**************************************************************
-    // should the options return something to allow player to play some card is dawn? or to exit game???????
+    /*
+    will make sure that the move that was made is valid for the game
+    will check that the card on top of the pile is the same color as the one that
+    is chosen to play or that they have the same color
+
+    return: bool
+    */
+    validateMove(cardToPlay){
+        let topCard = pile[pile.length-1];
+        console.log(`top card: ${topCard.getFace()} playedCard: ${cardToPlay.getFace()}`);
+
+        if(topCard.color === cardToPlay.color){
+            return true;
+        }
+        else if(topCard.number === cardToPlay.number){
+            return true;
+        }
+        return false;
+    }
+
+    /*
+    returns...
+    V for Valid move
+    I for Invalid move
+    D for Draw move
+    */
     makeMove(){
         printGameStats();
         console.log(`Player ${this.playerNum} Make Your Move`)
@@ -97,19 +121,22 @@ class Player {
         switch(move.toUpperCase()){
             //play the selected card
             case 'P':
-                let index = parseInt(prompt('which card?'),10);;
+                let index = parseInt(prompt('which card?'),10);
                 let cardToPlay = this.hand[index];
 
-                this.playCard(index);
-                console.log(`playing ${cardToPlay.getFace()}`)
-                pile.push(cardToPlay);
-                break;
+                if(this.validateMove(cardToPlay)){
+                    this.playCard(index);
+                    console.log(`playing ${cardToPlay.getFace()}`);
+                    pile.push(cardToPlay);
+                    return 'V';                                         // returns V for Valid move
+                }
+                return 'I';                                             // returns I for Invalid move
 
             // should something be returned if draw is chosen so that the player gets to play?
             // draw juan card
             case 'D':
                 cardDeal(this,1,deck);
-                break;
+                return 'D';
         }
     }
 }
@@ -292,8 +319,20 @@ pile.push(deck.pop());
 currPlayer = 0;
 while(!winner){
     // using remainder of curr / total
-    players[currPlayer % totalPlayers].makeMove();
-    currPlayer++;
+    let moveResult = players[currPlayer % totalPlayers].makeMove();
+    
+    switch(moveResult){
+        //valid move continue game
+        case 'V':
+            currPlayer++;
+            break;
+        case 'I':
+            console.log("invalid move... try again");
+            break;
+        case 'D':
+            console.log('you drew, select another move');
+            break;
+    }
 }
 
 
