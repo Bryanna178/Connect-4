@@ -111,7 +111,7 @@ class Player {
     returns...
     V for Valid move
     I for Invalid move
-    D for Draw move
+    D for Draw move     // can return P for pass if cannot draw anymore
     */
     makeMove(){
         printGameStats();
@@ -135,10 +135,23 @@ class Player {
             // should something be returned if draw is chosen so that the player gets to play?
             // draw juan card
             case 'D':
+                // if there are no more cards to draw from then pass on to the next player
+                if(deck.length === 0 && pile.length < 2){
+                    return 'P';
+                }
+
+                // else can deal out one card
                 cardDeal(this,1,deck);
                 return 'D';
         }
     }
+}
+
+function checkIfWinner(player){
+    if(player.hand.length === 0){
+        return true;
+    }
+    return false;
 }
 
 function printGameStats(){
@@ -243,12 +256,11 @@ function cardDeal(player,cardQuantity,gameDeck){
     for(var i = 0; i < cardQuantity; i++){
         // if the deck is empty get cards from the pile and reshuffle deck
         if(gameDeck.length === 0){
-            console.log("*********************************** game deck is 0");
+            
+            // check that there are some cards to use to reuse to give out
             if(pile.length > 1){
-                console.log('***************************************** pile is > 1');
-                reshuffleDeck();                // NEED TO MAKE SURE THAT THIS WORKS****
+                reshuffleDeck();
             }
-            console.log("******* NO MORE CARDS TO SHUFFLE");
         }
 
         //only give card if the game deck has cards to give
@@ -316,15 +328,21 @@ pile.push(deck.pop());
 
 // NEEED TO validate turns****************************
 // the main loop of the game
-currPlayer = 0;
+currPlayerCounter = 0;
+let currPlayer;
 while(!winner){
     // using remainder of curr / total
-    let moveResult = players[currPlayer % totalPlayers].makeMove();
+    currPlayer = players[currPlayerCounter % totalPlayers];
+    let moveResult = currPlayer.makeMove();
     
     switch(moveResult){
         //valid move continue game
         case 'V':
-            currPlayer++;
+            if(checkIfWinner(currPlayer)){
+                winner = true;
+                break;
+            }
+            currPlayerCounter++;
             break;
         case 'I':
             console.log("invalid move... try again");
@@ -332,9 +350,15 @@ while(!winner){
         case 'D':
             console.log('you drew, select another move');
             break;
+        case 'P':
+            console.log("cannot draw anymore so passing to next player");
+            currPlayerCounter++;
     }
 }
 
+console.log(`****** WINNER *******`);
+console.log(`player ${currPlayer.playerNum}`);
 
 
-console.log(`total cards in deck ${deck.length}, total real players ${totalRealPlayers}, total AI players ${totalAiPlayers}`);
+
+// console.log(`total cards in deck ${deck.length}, total real players ${totalRealPlayers}, total AI players ${totalAiPlayers}`);
