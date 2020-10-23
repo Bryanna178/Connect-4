@@ -42,43 +42,16 @@ function printBoard(){
 
 // checks if column is full
 function isColFull(checkCol){
-    // if - no longer exists in the top spot of the column
-    // then column is full
-    switch(checkCol){
-        case '1':
-            if (gameBoard[0][1] === '-'){
-                return false;
-            }
-        case '2':
-            if (gameBoard[0][3] === '-'){
-                return false;
-            }
-        case '3':
-            if (gameBoard[0][5] === '-'){
-                return false;
-            }
-        case '4':
-            if (gameBoard[0][7] === '-'){
-                return false;
-            }
-        case '5':
-            if (gameBoard[0][9] === '-'){
-                return false;
-            }
-        case '6':
-            if (gameBoard[0][11] === '-'){
-                return false;
-            }
-        case '7':
-            if (gameBoard[0][13] === '-'){
-                return false;
-            }
-        default: return true;
+    // checks only top row for empty space
+    if (gameBoard[0][checkCol-1] === '-'){
+        return false;
     }
+    return true;
 }
 
-// make move (by player?)
-function makeMove(){
+// takes in column #
+function makeMove(cNum){
+    var emptySpace;
     
 }
 
@@ -87,15 +60,12 @@ function isWinner(){
     return false;
 }
 
-// change the turn for the next player
-function determineTurn(currPlayer){
-
-}
-
-
 // start of actual game code
 createBlankBoard();
 printBoard(); // not needed once while loop is implemented
+
+// game piece alternates from 'x' and 'o' unless invalid move is given
+let gamePiece = 'x'
 
 //while loop for the game
 // while(!winner){
@@ -104,9 +74,11 @@ printBoard(); // not needed once while loop is implemented
     let move = prompt('Select a column 1-7: ');
 
     if (isColFull(move)){
+        //gamePiece should not change
         console.log("Sorry this column is full. Try another column.");            
     }
     else{
+        // makeMove()
         console.log("nothin there...");
     }
     
