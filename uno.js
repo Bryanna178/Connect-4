@@ -136,7 +136,12 @@ class Player {
             // draw juan card
             case 'D':
                 // if there are no more cards to draw from then pass on to the next player
-                if(deck.length === 0 && pile.length < 2){
+
+                /*--------------------
+                *** NEED TO ADD THE RESHUFFLE FUNCTIONALITY IF CANNOT DRAW ANYMORE BUTTTTTTTT
+                THERE ARE MORE THAN 2 CARDS ON THE FIELD
+                */
+                if(deck.length === 0){
                     return 'P';
                 }
 
@@ -144,6 +149,89 @@ class Player {
                 cardDeal(this,1,deck);
                 return 'D';
         }
+    }
+}
+
+/*
+AI class
+has the capability of doing everything a regular Player can
+but makes its own moves based on the following logic...
+
+gets rid of the same number same color first then same number then same color
+*/
+
+class AIPlayer extends Player{
+    constructor(playerNum,hand,aiPlayer){
+        super(playerNum,hand,aiPlayer);
+    }
+
+    /*
+    finds the card that meets the requirements from parameters
+    topCard: Card, the card from the top of the pile
+
+    will evaluate in the following order looking for a card to return
+        1 -> same number same color
+        2 -> same number different color
+        3 -> same color
+
+    return: Card if there is a card that meets requirements
+            null if there is no card that meets the requirements
+    */
+    findCard(topCard){
+        this.hand.array.forEach(c => {
+            if(c.number === topCard.number){
+                if(c.color === topCard.color){
+                    return c;
+                }
+            }
+        });
+
+        this.hand.array.forEach(c => {
+            if(c.number === topCard.number){
+                return c;
+            }
+        });
+
+        this.hand.array.forEach(c => {
+            if(c.color === topCard.color){
+                return c;
+            }
+        });
+
+        return null;
+    }
+
+    /*
+    based on what is on the top of the pile, selects the card to play
+    checks the card in play
+    if same number && same color available, play first
+    else if same number different color, play
+    else if same color, play
+    */
+    whatCardToPlay(){
+        topCard = pile[pile.length-1];
+
+        return this.findCard(topCard);
+    }
+
+    makeMove(card){
+
+        if(card != null){
+            this.playCard(index);
+            console.log(`playing ${cardToPlay.getFace()}`);
+            pile.push(cardToPlay);
+            return 'V';                                         // returns V for Valid move
+        }
+        else{
+            if(deck.length === 0 && pile.length < 2){
+                return 'P';
+            }
+    
+            // else can deal out one card
+            cardDeal(this,1,deck);
+            return 'D';
+        }
+
     }
 }
 
