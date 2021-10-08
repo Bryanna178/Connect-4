@@ -223,7 +223,7 @@ class AIPlayer extends Player{
             return 'V';                                         // returns V for Valid move
         }
         else{
-            if(deck.length === 0 && pile.length < 2){
+            if(deck.length === 0){
                 return 'P';
             }
     
