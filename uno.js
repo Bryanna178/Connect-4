@@ -152,6 +152,8 @@ class Player {
     }
 }
 
+//--------------------------------------------------------------------------MAKE SURE TO FINISH*******
+
 /*
 AI class
 has the capability of doing everything a regular Player can
@@ -178,26 +180,28 @@ class AIPlayer extends Player{
             null if there is no card that meets the requirements
     */
     findCard(topCard){
-        this.hand.array.forEach(c => {
+        console.log(`finding card for AI player top card ${topCard.color} ${topCard.number}`);
+        for(const c of this.hand){
             if(c.number === topCard.number){
                 if(c.color === topCard.color){
                     return c;
                 }
             }
-        });
+        }
 
-        this.hand.array.forEach(c => {
+        for(const c of this.hand){
             if(c.number === topCard.number){
                 return c;
             }
-        });
+        }
 
-        this.hand.array.forEach(c => {
+        for(const c of this.hand){
             if(c.color === topCard.color){
                 return c;
             }
-        });
+        }
 
+        console.log(`could not find any.....`);
         return null;
     }
 
@@ -209,31 +213,48 @@ class AIPlayer extends Player{
     else if same color, play
     */
     whatCardToPlay(){
-        topCard = pile[pile.length-1];
-
+        var topCard = pile[pile.length-1];
         return this.findCard(topCard);
     }
 
-    makeMove(card){
+    /*
+    function assumes that the card exists in the hand
+    */
+    getCardIndex(card){
+        var i = 0;
+        for(const c of this.hand){
+            if(c.color === card.color){
+                if(c.number === card.number){
+                    return i;
+                }
+            }
+            i++;
+        }
+    }
+
+    makeMove(){
+        var card = this.whatCardToPlay();
 
         if(card != null){
-            this.playCard(index);
-            console.log(`playing ${cardToPlay.getFace()}`);
-            pile.push(cardToPlay);
+            this.playCard(this.getCardIndex(card));
+            console.log(`***AI*** playing ${card.getFace()}`);
+            this.printInfo();
+            pile.push(card);
             return 'V';                                         // returns V for Valid move
         }
         else{
             if(deck.length === 0){
+                console.log(`***AI*** passing`);
                 return 'P';
             }
     
             // else can deal out one card
             cardDeal(this,1,deck);
+            console.log(`***AI*** drawing`);
             return 'D';
         }
-
     }
-}
+}       // end of AIPLayer class
 
 function checkIfWinner(player){
     if(player.hand.length === 0){
@@ -268,8 +289,10 @@ function createPlayers(){
     for(var i = 0; i < totalRealPlayers; i++){
         playerArr.push(new Player(i,[],false));
     }
+
+    //AI players
     for(var i = totalRealPlayers; i < totalPlayers; i++){
-        playerArr.push(new Player(i,[],true));
+        playerArr.push(new AIPlayer(i,[],true));
     }
 
     return playerArr;
