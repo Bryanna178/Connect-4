@@ -136,7 +136,12 @@ class Player {
             // draw juan card
             case 'D':
                 // if there are no more cards to draw from then pass on to the next player
-                if(deck.length === 0 && pile.length < 2){
+
+                /*--------------------
+                *** NEED TO ADD THE RESHUFFLE FUNCTIONALITY IF CANNOT DRAW ANYMORE BUTTTTTTTT
+                THERE ARE MORE THAN 2 CARDS ON THE FIELD
+                */
+                if(deck.length === 0){
                     return 'P';
                 }
 
@@ -146,6 +151,110 @@ class Player {
         }
     }
 }
+
+//--------------------------------------------------------------------------MAKE SURE TO FINISH*******
+
+/*
+AI class
+has the capability of doing everything a regular Player can
+but makes its own moves based on the following logic...
+
+gets rid of the same number same color first then same number then same color
+*/
+
+class AIPlayer extends Player{
+    constructor(playerNum,hand,aiPlayer){
+        super(playerNum,hand,aiPlayer);
+    }
+
+    /*
+    finds the card that meets the requirements from parameters
+    topCard: Card, the card from the top of the pile
+
+    will evaluate in the following order looking for a card to return
+        1 -> same number same color
+        2 -> same number different color
+        3 -> same color
+
+    return: Card if there is a card that meets requirements
+            null if there is no card that meets the requirements
+    */
+    findCard(topCard){
+        console.log(`finding card for AI player top card ${topCard.color} ${topCard.number}`);
+        for(const c of this.hand){
+            if(c.number === topCard.number){
+                if(c.color === topCard.color){
+                    return c;
+                }
+            }
+        }
+
+        for(const c of this.hand){
+            if(c.number === topCard.number){
+                return c;
+            }
+        }
+
+        for(const c of this.hand){
+            if(c.color === topCard.color){
+                return c;
+            }
+        }
+
+        console.log(`could not find any.....`);
+        return null;
+    }
+
+    /*
+    based on what is on the top of the pile, selects the card to play
+    checks the card in play
+    if same number && same color available, play first
+    else if same number different color, play
+    else if same color, play
+    */
+    whatCardToPlay(){
+        var topCard = pile[pile.length-1];
+        return this.findCard(topCard);
+    }
+
+    /*
+    function assumes that the card exists in the hand
+    */
+    getCardIndex(card){
+        var i = 0;
+        for(const c of this.hand){
+            if(c.color === card.color){
+                if(c.number === card.number){
+                    return i;
+                }
+            }
+            i++;
+        }
+    }
+
+    makeMove(){
+        var card = this.whatCardToPlay();
+
+        if(card != null){
+            this.playCard(this.getCardIndex(card));
+            console.log(`***AI*** playing ${card.getFace()}`);
+            this.printInfo();
+            pile.push(card);
+            return 'V';                                         // returns V for Valid move
+        }
+        else{
+            if(deck.length === 0){
+                console.log(`***AI*** passing`);
+                return 'P';
+            }
+    
+            // else can deal out one card
+            cardDeal(this,1,deck);
+            console.log(`***AI*** drawing`);
+            return 'D';
+        }
+    }
+}       // end of AIPLayer class
 
 function checkIfWinner(player){
     if(player.hand.length === 0){
@@ -180,8 +289,10 @@ function createPlayers(){
     for(var i = 0; i < totalRealPlayers; i++){
         playerArr.push(new Player(i,[],false));
     }
+
+    //AI players
     for(var i = totalRealPlayers; i < totalPlayers; i++){
-        playerArr.push(new Player(i,[],true));
+        playerArr.push(new AIPlayer(i,[],true));
     }
 
     return playerArr;
