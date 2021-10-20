@@ -96,7 +96,8 @@ class Player {
     */
     validateMove(cardToPlay){
         let topCard = pile[pile.length-1];
-        console.log(`top card: ${topCard.getFace()} playedCard: ${cardToPlay.getFace()}`);
+        if(topCard != null)
+            console.log(`top card: ${topCard.getFace()} playedCard: ${cardToPlay.getFace()}`);
 
         if(topCard.color === cardToPlay.color){
             return true;
@@ -112,6 +113,7 @@ class Player {
     V for Valid move
     I for Invalid move
     D for Draw move     // can return P for pass if cannot draw anymore
+    R for reshuffle
     */
     makeMove(){
         printGameStats();
@@ -135,19 +137,8 @@ class Player {
             // should something be returned if draw is chosen so that the player gets to play?
             // draw juan card
             case 'D':
-                // if there are no more cards to draw from then pass on to the next player
-
-                /*--------------------
-                *** NEED TO ADD THE RESHUFFLE FUNCTIONALITY IF CANNOT DRAW ANYMORE BUTTTTTTTT
-                THERE ARE MORE THAN 2 CARDS ON THE FIELD
-                */
-                if(deck.length === 0){
-                    return 'P';
-                }
-
-                // else can deal out one card
-                cardDeal(this,1,deck);
-                return 'D';
+                // try to draw card, if unable to then reshuffle and pass turn
+                return cardDeal(this);
         }
     }
 }
@@ -180,7 +171,7 @@ class AIPlayer extends Player{
             null if there is no card that meets the requirements
     */
     findCard(topCard){
-        console.log(`finding card for AI player top card ${topCard.color} ${topCard.number}`);
+        // console.log(`finding card for AI player top card ${topCard.color} ${topCard.number}`);
         for(const c of this.hand){
             if(c.number === topCard.number){
                 if(c.color === topCard.color){
@@ -201,7 +192,7 @@ class AIPlayer extends Player{
             }
         }
 
-        console.log(`could not find any.....`);
+        // console.log(`could not find any.....`);
         return null;
     }
 
@@ -237,21 +228,13 @@ class AIPlayer extends Player{
 
         if(card != null){
             this.playCard(this.getCardIndex(card));
-            console.log(`***AI*** playing ${card.getFace()}`);
+            // console.log(`***AI*** playing ${card.getFace()}`);
             this.printInfo();
             pile.push(card);
             return 'V';                                         // returns V for Valid move
         }
         else{
-            if(deck.length === 0){
-                console.log(`***AI*** passing`);
-                return 'P';
-            }
-    
-            // else can deal out one card
-            cardDeal(this,1,deck);
-            console.log(`***AI*** drawing`);
-            return 'D';
+            return cardDeal(this);
         }
     }
 }       // end of AIPLayer class
@@ -360,25 +343,42 @@ function shuffleDeck(playingDeck){
 
 
 /*
-gives cardQuantity amount of cards to the designated player
+regular card deal, deals ONE card at a time
 written to get from the bottom of the deck (pop)
+if unable to draw, it will shuffle the deck IFF
+there are at least 3 cards in the pile. else it will just pass players turn
 */
-function cardDeal(player,cardQuantity,gameDeck){
-    for(var i = 0; i < cardQuantity; i++){
-        // if the deck is empty get cards from the pile and reshuffle deck
-        if(gameDeck.length === 0){
-            
-            // check that there are some cards to use to reuse to give out
-            if(pile.length > 1){
-                reshuffleDeck();
-            }
+function cardDeal(player){
+    // if the deck is empty get cards from the pile and reshuffle deck
+    if(deck.length === 0){
+        console.log(`deck === 0 about to reshuffle`);
+        // check that there are some cards to use to reuse to give out
+        if(pile.length > 2){
+            console.log(`pile > 2 about to reshuffle`);
+            reshuffleDeck();
+            return 'R';
         }
+        //pile does not have more than 2 cards... so someone is bound to have a card to play
+        return 'P';
+    }
 
-        //only give card if the game deck has cards to give
-        if(gameDeck.length > 0){
-            player.hand.push(gameDeck.pop());
-            console.log(gameDeck.length);
-        }
+    //only give card if the game deck has cards to give
+    if(deck.length > 0){
+        player.hand.push(deck.pop());
+        console.log(deck.length);
+        return 'D';
+    }
+}
+
+/*
+initial card deal to get the game started
+gives out 5 cards, can be changed...
+*/
+function initialCardDeal(player){
+    var initialCardQuantity = 5;
+    for(var i = 0; i < initialCardQuantity; i++){
+        player.hand.push(deck.pop());
+        console.log(deck.length);
     }
 }
 
@@ -426,7 +426,7 @@ players = createPlayers();
 
 // give cards to players
 for(var i = 0; i < players.length; i++){
-    cardDeal(players[i],5,deck);
+    initialCardDeal(players[i]);
 }
 
 // print info for all the players
@@ -464,6 +464,11 @@ while(!winner){
         case 'P':
             console.log("cannot draw anymore so passing to next player");
             currPlayerCounter++;
+            break;
+        case 'R':
+            console.log("deck was reshuffled. player got card and passed turn");        //should this be changed to redoing turn?
+            currPlayerCounter++;
+            break;
     }
 }
 
