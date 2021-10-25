@@ -42,12 +42,15 @@ class Card {
             switch(randomNum){
                 case 1:
                     this.special = `SKIP`;
+                    this.number = 11;
                     break;
                 case 2:
                     this.special = `REVERSE`;
+                    this.number = 12;
                     break;
                 case 3:
                     this.special = `DRAW`;
+                    this.number = 13;
                     var randomNum = Math.floor(Math.random() * 2) + 1;
                     // console.log(`we got ${randomNum} as random number 0-1`);
                     if(randomNum === 1){
@@ -59,6 +62,7 @@ class Card {
                     break;
                 case 4:
                     this.special = `WILD`;
+                    this.number = 14;
                     break;
                 default:
                     this.special = `NONE`;  // should not happen but if it does...
