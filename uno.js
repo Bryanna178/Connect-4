@@ -3,6 +3,8 @@ let deck = [];      // cards that can be drawn out
 let pile = [];      // played cards
 let players = [];   // list of players
 let winner = false;
+let currPlayerCounter = 0;
+let rotation = 0;       // for in case when reverse is used 0 = forward, 1 = reverse
 
 /*
 used to prompt user for input but need to run the following command to use
@@ -24,20 +26,74 @@ class Card {
         this.number = number;
         this.playable = true;
         this.inDeck = true;
+        this.special = `NONE`;      // can be 'NONE' for regular card or 'SKIP', 'REVERSE', 'DRAW', 'WILD'
+        this.drawDesc = 0      // can be +4, +2
+
+        if(this.number > 10){
+            // getting a random number 1-4 to determine the special
+            var randomNum = Math.floor(Math.random() * 4) + 1;
+            // console.log(`we got ${randomNum} as random number 0-3`);
+            /*
+            0 = SKIP
+            1 = REVERSE
+            2 = DRAW
+            3 = WILD
+            */
+            switch(randomNum){
+                case 1:
+                    this.special = `SKIP`;
+                    this.number = 11;
+                    break;
+                case 2:
+                    this.special = `REVERSE`;
+                    this.number = 12;
+                    break;
+                case 3:
+                    this.special = `DRAW`;
+                    this.number = 13;
+                    var randomNum = Math.floor(Math.random() * 2) + 1;
+                    // console.log(`we got ${randomNum} as random number 0-1`);
+                    if(randomNum === 1){
+                        this.drawDesc = 2;
+                    }
+                    else{
+                        this.drawDesc = 4;
+                    }
+                    break;
+                case 4:
+                    this.special = `WILD`;
+                    this.number = 14;
+                    break;
+                default:
+                    this.special = `NONE`;  // should not happen but if it does...
+                    break;
+            }
+        }
     }
     
     printFace(){
-        console.log(this.color + ' ' + this.number + '\n');
+        console.log(this.color + ' ' + this.number + ' ' + this.special + ' ' + this.drawDesc + '\n');
     }
 
     // returns the face of the card as a string so that it can be used 
     getFace(){
-        return this.color + ' ' + this.number;
+        if(this.special === `NONE`){
+            return this.color + ' ' + this.number;
+        }
+        else if(this.special === `DRAW`){
+            return this.color + ' ' + this.special + ` draw: {${this.drawDesc}}`;
+        }
+        else if(this.special === `WILD`){
+            return this.special + ` draw: {${this.drawDesc}}`;
+        }
+        else{
+            return this.color + ' ' + this.special;
+        }
     }
 
     printInfo(){
-        console.log(this.color + ' ' + this.number);
-        console.log('playable: ' + this.playable + ' in deck: ' + this.inDeck)
+        console.log(this.color + ' ' + this.number + ' ' + this.special + ' ' + this.drawDesc + '\n');
+        console.log('playable: ' + this.playable + ' in deck: ' + this.inDeck + '\n');
     }
 }
 
@@ -105,6 +161,8 @@ class Player {
         else if(topCard.number === cardToPlay.number){
             return true;
         }
+        //add wild card logic here**************
+        // else if
         return false;
     }
 
@@ -114,6 +172,7 @@ class Player {
     I for Invalid move
     D for Draw move     // can return P for pass if cannot draw anymore
     R for reshuffle
+    s for skip
     */
     makeMove(){
         printGameStats();
@@ -125,14 +184,24 @@ class Player {
             case 'P':
                 let index = parseInt(prompt('which card?'),10);
                 let cardToPlay = this.hand[index];
+                if(cardToPlay == null){
+                    return 'I';
+                }
 
                 if(this.validateMove(cardToPlay)){
                     this.playCard(index);
                     console.log(`playing ${cardToPlay.getFace()}`);
                     pile.push(cardToPlay);
-                    return 'V';                                         // returns V for Valid move
+
+                    if(cardToPlay.special === 'SKIP'){
+                        return 'S';
+                    }
+                    else if(cardToPlay.special === 'REVERSE'){
+                        rotation++;
+                    }
+                    return 'V';
                 }
-                return 'I';                                             // returns I for Invalid move
+                return 'I';
 
             // should something be returned if draw is chosen so that the player gets to play?
             // draw juan card
@@ -228,9 +297,18 @@ class AIPlayer extends Player{
 
         if(card != null){
             this.playCard(this.getCardIndex(card));
-            // console.log(`***AI*** playing ${card.getFace()}`);
+            console.log("***AI*** playing \n");
+            card.printFace();
+
             this.printInfo();
             pile.push(card);
+
+            if(card.special === 'SKIP'){
+                return 'S';
+            }
+            else if(card.special === 'REVERSE'){
+                rotation++;
+            }
             return 'V';                                         // returns V for Valid move
         }
         else{
@@ -310,11 +388,13 @@ function createDeck(){
     var colorArr = ['RED','BLUE','PURPLE','YELLOW','GREEN'];
 
     for(var i = 0; i < 5; i++){
-        for(var x = 0; x < 10; x++){                // change to x < 1 to see that it works
+        for(var x = 0; x < 12; x++){                // changed from < 10 to 12 to incude the skip and reverse
             var newCard = new Card(colorArr[i],x+1);
+            //newCard.printInfo();
             deck.push(newCard);
         }
     }
+    // console.log(`total deck size: ${deck.length}`);
 }
 
 function shuffleDeck(playingDeck){
@@ -378,7 +458,7 @@ function initialCardDeal(player){
     var initialCardQuantity = 5;
     for(var i = 0; i < initialCardQuantity; i++){
         player.hand.push(deck.pop());
-        console.log(deck.length);
+        // console.log(deck.length);
     }
 }
 
@@ -405,6 +485,22 @@ function reshuffleDeck(){
     delete pile;
     pile = [topCard];
     console.log('done reshuffling deck from used card pile');
+}
+
+/*
+isForward: bool
+            true for regular ++
+            false for backwards --
+*/
+function updateCurrPlayer(){
+    if(rotation % 2 == 0){
+        console.log(`************ forward *******************`);
+        currPlayerCounter++;
+    }
+    else{
+        console.log(`************ BACKWARDS *******************`);
+        currPlayerCounter--;
+    }
 }
 
 //--------------------------------------------------------- actual game code so far it is just practice
@@ -439,11 +535,17 @@ pile.push(deck.pop());
 
 // NEEED TO validate turns****************************
 // the main loop of the game
-currPlayerCounter = 0;
 let currPlayer;
 while(!winner){
     // using remainder of curr / total
-    currPlayer = players[currPlayerCounter % totalPlayers];
+    console.log(`***CURR PLAYER COUNTER ${currPlayerCounter}`);
+    if(currPlayerCounter >= 0){
+        currPlayer = players[currPlayerCounter % totalPlayers];
+    }
+    else{
+        // expression to go backwards... ((x-1) % k + k) % k
+        currPlayer = players[(((currPlayerCounter-1) % totalPlayers) + totalPlayers) % totalPlayers];
+    }
     let moveResult = currPlayer.makeMove();
     
     switch(moveResult){
@@ -453,7 +555,8 @@ while(!winner){
                 winner = true;
                 break;
             }
-            currPlayerCounter++;
+            // currPlayerCounter++;
+            updateCurrPlayer();
             break;
         case 'I':
             console.log("invalid move... try again");
@@ -463,11 +566,21 @@ while(!winner){
             break;
         case 'P':
             console.log("cannot draw anymore so passing to next player");
-            currPlayerCounter++;
+            updateCurrPlayer();
             break;
         case 'R':
             console.log("deck was reshuffled. player got card and passed turn");        //should this be changed to redoing turn?
-            currPlayerCounter++;
+            updateCurrPlayer();
+            // currPlayerCounter++;
+            break;
+        case 'S':
+            console.log("next player has been skipped...");
+            if(rotation % 2 == 0){
+                currPlayerCounter += 2;
+            }
+            else{
+                currPlayerCounter -= 2;
+            }
             break;
     }
 }
@@ -478,3 +591,14 @@ console.log(`player ${currPlayer.playerNum}`);
 
 
 // console.log(`total cards in deck ${deck.length}, total real players ${totalRealPlayers}, total AI players ${totalAiPlayers}`);
+
+/*
+next would be to add the reverse/skip/draw cards and wild card functionalities...
+
+maybe get the skip/reverse -> drawing cards -> basic wild card first -> draw + wild card
+
+
+
+
+FIX BEING ABLE TO STACK REVERSE CARDS + SKIP CARDS***************** AND WILD CARDS AND DRAW CARDS...
+*/
