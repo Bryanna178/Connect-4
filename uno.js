@@ -62,6 +62,7 @@ class Card {
                     break;
                 case 4:
                     this.special = `WILD`;
+                    this.color = `WILD`;
                     this.number = 14;
                     break;
                 default:
@@ -77,13 +78,13 @@ class Card {
 
     // returns the face of the card as a string so that it can be used 
     getFace(){
-        if(this.special === `NONE`){
+        if(this.special == `NONE`){
             return this.color + ' ' + this.number;
         }
-        else if(this.special === `DRAW`){
+        else if(this.special == `DRAW`){
             return this.color + ' ' + this.special + ` draw: {${this.drawDesc}}`;
         }
-        else if(this.special === `WILD`){
+        else if(this.special == `WILD`){
             return this.special + ` draw: {${this.drawDesc}}`;
         }
         else{
@@ -144,6 +145,35 @@ class Player {
     }
 
     /*
+    user selects the color of the wild card in place
+    */
+    colorSelection(card){
+        var newColor = prompt('r: Red, b: Blue, g: Green, y: Yellow, p: Purple\n');
+        switch(newColor.toUpperCase()){
+            case `R`:
+                card.color = 'RED';
+                break;
+            case `B`:
+                card.color = `BLUE`;
+                break;
+            case `G`:
+                card.color = `GREEN`;
+                break;
+            case `Y`:
+                card.color = `YELLOW`;
+                break;
+            case `P`:
+                card.color = `PURPLE`;
+                break;
+            // call the function again to retry
+            default:
+                this.colorSelection(card);
+                return;
+        }
+        card.special = `NONE`;
+    }
+
+    /*
     will make sure that the move that was made is valid for the game
     will check that the card on top of the pile is the same color as the one that
     is chosen to play or that they have the same color
@@ -152,17 +182,20 @@ class Player {
     */
     validateMove(cardToPlay){
         let topCard = pile[pile.length-1];
-        if(topCard != null)
+        if(topCard != null){
             console.log(`top card: ${topCard.getFace()} playedCard: ${cardToPlay.getFace()}`);
-
-        if(topCard.color === cardToPlay.color){
+        }
+        if(topCard.color == cardToPlay.color){                  // THIS AND THE BELOW CONDITION WERE ===
             return true;
         }
-        else if(topCard.number === cardToPlay.number){
+        else if(topCard.number == cardToPlay.number){
             return true;
         }
         //add wild card logic here**************
-        // else if
+        else if(cardToPlay.special == `WILD`){
+            this.colorSelection(cardToPlay);
+            return true;
+        }
         return false;
     }
 
@@ -228,35 +261,80 @@ class AIPlayer extends Player{
     }
 
     /*
+    how the AI is going to determine what color to choose when using a wild card
+    check the cards in its hand and check what colored cards it has the most of
+
+    the color with the most cards is the color the AI is going to select
+    */
+    wildCardColorSelection(){
+        var map = new Map();
+        var highCount = 0;
+        var prevHighKey = `NONE`; // in case the high count is for WILD
+        var highKey = `NONE`;
+
+        for(const c of this.hand){
+            if(!map.has(c.color)){
+                map.set(c.color,1);
+            }
+            else{
+                map.set(c.color,map.get(c.color) + 1);
+            }
+        }
+
+        for(const k of map.keys()){
+            if(map.get(k) > highCount){
+                highCount = map.get(k);
+                prevHighKey = highKey;
+                highKey = k;
+                // console.log(`high key ${k}*********************************************************`);
+            }
+        }
+
+        // RARE CASE*** if WILD is the highest color then pick a random color
+        if(map.get(highKey) == `WILD`){
+            var colors = ['RED','BLUE','GREEN','YELLOW','PURPLE'];
+            var rand = Math.floor(Math.random() * 5);
+            // console.log(`***********WILD**********RANDOM COLOR CHOSEN ${colors[rand]}`);
+            return colors[rand];
+        }
+        
+        return highKey;
+
+    }
+
+    /*
     finds the card that meets the requirements from parameters
     topCard: Card, the card from the top of the pile
 
     will evaluate in the following order looking for a card to return
-        1 -> same number same color
-        2 -> same number different color
-        3 -> same color
+        1 -> same number different color
+        2 -> same color
+        3 -> wild card
 
     return: Card if there is a card that meets requirements
             null if there is no card that meets the requirements
     */
     findCard(topCard){
         // console.log(`finding card for AI player top card ${topCard.color} ${topCard.number}`);
+
         for(const c of this.hand){
             if(c.number === topCard.number){
-                if(c.color === topCard.color){
+                if(c.special != `WILD`){
                     return c;
                 }
             }
         }
 
         for(const c of this.hand){
-            if(c.number === topCard.number){
+            if(c.color === topCard.color){
                 return c;
             }
         }
 
+        //wild card
         for(const c of this.hand){
-            if(c.color === topCard.color){
+            if(c.special == `WILD`){
+                c.color = this.wildCardColorSelection();
                 return c;
             }
         }
