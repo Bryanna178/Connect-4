@@ -64,9 +64,17 @@ function isWinner(gamePiece){
   return false;
 }
 
+function changeGamePiece(gamePiece){
+  if (gamePiece.localeCompare("x") === 0){
+    return "o";
+  }
+  else if (gamePiece.localeCompare("o") === 0){
+    return "x";
+  }
+}
+
 // game piece alternates from 'x' and 'o' unless invalid move is given
 let gamePiece = 'x';
-let player = 'Player One';
 
 //while loop for the game
 // while(!winner){
@@ -83,7 +91,8 @@ let player = 'Player One';
     //   console.log("Sorry this column is full. Try another column.");
     // }
     
-//     isWinner();
+  gamePiece = changeGamePiece(gamePiece);
 // }
+//     isWinner();
 
 console.log("fin");
